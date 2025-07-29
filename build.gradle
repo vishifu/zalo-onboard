@@ -1,0 +1,57 @@
+plugins {
+    id "java"
+}
+
+group = "org.sample"
+version = "1.0-SNAPSHOT"
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // https://mvnrepository.com/artifact/org.apache.thrift/libthrift
+    implementation("org.apache.thrift:libthrift:0.22.0")
+    // https://mvnrepository.com/artifact/org.slf4j/slf4j-api
+    implementation("org.slf4j:slf4j-api:1.7.36")
+    // https://mvnrepository.com/artifact/ch.qos.logback/logback-classic
+    implementation("ch.qos.logback:logback-core:1.2.13")
+    implementation("ch.qos.logback:logback-classic:1.2.13")
+    testImplementation platform("org.junit:junit-bom:5.10.0")
+    testImplementation "org.junit.jupiter:junit-jupiter"
+}
+
+test {
+    useJUnitPlatform()
+}
+
+tasks.register("generateThrift", Exec) {
+    def thriftDir = new File("src/main/thrift") // Replace with your directory path
+    if (thriftDir.exists() && thriftDir.isDirectory()) {
+        thriftDir.eachFile { file ->
+            if (file.isFile()) {
+                println file.name
+                commandLine "thrift",
+                        "-r -gen", "java",
+                        "src/main/thrift/" + file.name
+            }
+        }
+    } else {
+        println "Directory not found or is not a directory."
+    }
+}
+
+tasks.register("cleanThrift", Exec) {
+    def destThriftDir = "${projectDir}/src/main/java/org/sample/thrift"
+    commandLine "rm", "-rf", destThriftDir
+    println "Clean thrift source"
+}
+tasks.register("prepareThrift", Exec) {
+    def genDir = "${projectDir}/gen-java/org/sample/thrift"
+    def destDir = "${projectDir}/src/main/java/org/sample"
+    commandLine "mv", genDir, destDir
+    println "Move gen-java to sample package"
+}
+prepareThrift.dependsOn("generateThrift", "cleanThrift")
+
+compileJava.dependsOn("prepareThrift")
