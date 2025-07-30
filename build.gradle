@@ -10,6 +10,8 @@ repositories {
 }
 
 dependencies {
+    // https://mvnrepository.com/artifact/org.mongodb/mongodb-driver-sync
+    implementation("org.mongodb:mongodb-driver-sync:5.5.1")
     // https://mvnrepository.com/artifact/org.apache.thrift/libthrift
     implementation("org.apache.thrift:libthrift:0.22.0")
     // https://mvnrepository.com/artifact/org.slf4j/slf4j-api
