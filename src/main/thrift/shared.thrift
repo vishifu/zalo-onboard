@@ -1,12 +1,8 @@
 namespace java org.sample.thrift
 
-typedef i32 int
-
-struct SharedStruct {
-    1: i32 key
-    2: string value
-}
-
-service SharedService {
-    SharedStruct getStruct()
+struct SongStruct {
+    1: i32 id
+    2: string name
+    3: double rating
+    4: binary content
 }

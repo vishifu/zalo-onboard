@@ -6,14 +6,14 @@ import org.apache.thrift.server.TSimpleServer;
 import org.apache.thrift.transport.TServerSocket;
 import org.apache.thrift.transport.TServerTransport;
 import org.apache.thrift.transport.TTransportException;
-import org.sample.app.handler.CalculatorHandler;
-import org.sample.thrift.Calculator;
+import org.sample.app.handler.PlayerHandler;
+import org.sample.thrift.Player;
 
 public class ServerApp {
     private static final int port = 9900;
 
     public static void main(String[] args) throws TTransportException {
-        Calculator.Processor<CalculatorHandler> processor = new Calculator.Processor<>(new CalculatorHandler());
+        Player.Processor<PlayerHandler> processor = new Player.Processor<>(new PlayerHandler());
         TServerTransport transport = new TServerSocket(port);
         TServer.Args serverArgs = new TServer.Args(transport)
                 .processor(processor)

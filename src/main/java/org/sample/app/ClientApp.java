@@ -5,35 +5,86 @@ import org.apache.thrift.protocol.TBinaryProtocol;
 import org.apache.thrift.protocol.TProtocol;
 import org.apache.thrift.transport.TSocket;
 import org.apache.thrift.transport.TTransport;
-import org.apache.thrift.transport.layered.TFramedTransport;
-import org.sample.thrift.Calculator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.sample.thrift.Player;
+import org.sample.thrift.SongStruct;
+
+import java.nio.ByteBuffer;
+import java.util.Random;
+import java.util.Scanner;
+
 
 public class ClientApp {
-    private static final Logger log = LoggerFactory.getLogger(ClientApp.class);
+    private static final Scanner sc = new Scanner(System.in);
+    private static final Random rand = new Random(System.nanoTime());
 
     private static final int serverPort = 9900;
     private static final String serverHost = "localhost";
 
     public static void main(String[] args) throws TException {
         TTransport transport = new TSocket(serverHost, serverPort);
+        TProtocol protocol = new TBinaryProtocol(transport);
         transport.open();
 
-        TProtocol protocol = new TBinaryProtocol(transport);
-        Calculator.Client client = new Calculator.Client(protocol);
-
+        Player.Client client = new Player.Client(protocol);
         work(client);
     }
 
-     static void work(Calculator.Client client) throws TException {
-        client.ping();
-        log.info("call ping()");
+    static void work(Player.Client client) throws TException {
+        println("Input:");
+        println("\t1: get a song");
+        println("\t2: save a song");
 
-        int result = client.add(100, 200);
-        log.info("call add({}, {}) = {}", 100, 200, result);
 
-        result = client.add(500, 25);
-         log.info("call add({}, {}) = {}", 500, 25, result);
+        while (true) {
+            print("input op: ");
+            int op = sc.nextInt();
+            switch (op) {
+                case 1:
+                    int id = inputSongID();
+                    SongStruct song = client.get(id);
+                    println("got song: " + song);
+                    break;
+
+                case 2:
+                    SongStruct songStruct = inputSongStruct();
+                    client.save(songStruct);
+                    println("...saving song " + songStruct.id);
+                    break;
+
+                default:
+                    return;
+            }
+        }
+    }
+
+    private static int inputSongID() {
+        print("...input song id: ");
+        int id = sc.nextInt();
+
+        return id;
+    }
+
+    private static SongStruct inputSongStruct() {
+        print("...input song id: ");
+        int id = sc.nextInt();
+
+        print("...input song name: ");
+        String name = sc.next();
+
+        print("...input rating: ");
+        double rating = sc.nextDouble();
+
+        byte[] bytes = new byte[1024];
+        rand.nextBytes(bytes);
+        ByteBuffer content = ByteBuffer.wrap(bytes);
+        return new SongStruct(id, name, rating, content);
+    }
+
+    private static void print(String text) {
+        System.out.print(text);
+    }
+
+    private static void println(String text) {
+        System.out.println(text);
     }
 }
