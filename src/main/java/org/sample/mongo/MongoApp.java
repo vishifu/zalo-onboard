@@ -9,12 +9,15 @@ import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.codecs.pojo.PojoCodecProvider;
 import org.bson.types.ObjectId;
 import org.sample.thrift.SongStruct;
+import org.sample.util.RandUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 
 import static com.mongodb.MongoClientSettings.getDefaultCodecRegistry;
 import static org.bson.codecs.configuration.CodecRegistries.*;
@@ -24,13 +27,16 @@ import static org.bson.codecs.configuration.CodecRegistries.*;
  */
 public class MongoApp {
     private static final Logger log = LoggerFactory.getLogger(MongoApp.class);
-    static Random rand = new Random(System.nanoTime());
 
     public static void main(String[] args) {
+        ThriftCodecProvider thriftCodecProvider = new ThriftCodecProvider()
+                .register(SongStruct.class);
+
         CodecProvider pojoCodecProvider = PojoCodecProvider.builder()
                 .automatic(true).build();
+
         CodecRegistry pojoCodecRegistry = fromRegistries(getDefaultCodecRegistry(),
-                fromProviders(pojoCodecProvider));
+                fromProviders(pojoCodecProvider, thriftCodecProvider));
 
         MongoClient mongoClient = MongoSupport.getMongoClient();
         log.info("{}", mongoClient.getClusterDescription().toString());
@@ -40,29 +46,15 @@ public class MongoApp {
         MongoCollection<SongStruct> collection = database.getCollection(MongoConstants.COLLECTION_SAMPLE_SONGS,
                 SongStruct.class);
 
-//        collection.deleteMany(new Document());
-//        workInsertDocument(collection, 10);
+        workInsertDocument(collection, 10);
 
         SongStruct retSong = collection.find(new Document("id", 1)).first();
         System.out.println(retSong.toString());
-//        log.info("{}", retSong.get("id"));
-//        log.info("{}", retSong.get("name"));
-//        log.info("{}", retSong.get("rating"));
-//        log.info("{}", retSong.get("content"));
-//        log.info("find song id 1: {}", retSong.toJson());
     }
 
-    static void workInsertDocument(MongoCollection<Document> collection, int num) {
-        List<Document> list = new ArrayList<>();
-        for (int i = 1; i <= num; i++) {
-            Document obj = new Document("_id", new ObjectId())
-                    .append("song_id", i)
-                    .append("name", "song_" + rand.nextInt())
-                    .append("rating", rand.nextFloat());
-
-            list.add(obj);
-        }
-
-        collection.insertMany(list);
+    static void workInsertDocument(MongoCollection<SongStruct> collection, int num) {
+        SongStruct songStruct = new SongStruct(1, "test-1", 1.0, Set.of(1,2,3),
+                ByteBuffer.wrap(RandUtil.randBytes(20)));
+        collection.insertOne(songStruct);
     }
 }
