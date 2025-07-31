@@ -1,17 +1,13 @@
 package org.sample.mongo;
 
-import com.mongodb.MongoClientSettings;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import org.bson.Document;
 import org.bson.codecs.configuration.CodecProvider;
-import org.bson.codecs.configuration.CodecRegistries;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.codecs.pojo.PojoCodecProvider;
 import org.bson.types.ObjectId;
-import org.sample.mongo.codec.ByteBufferCodec;
-import org.sample.mongo.codec.SongStructCodecProvider;
 import org.sample.thrift.SongStruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,8 +30,7 @@ public class MongoApp {
         CodecProvider pojoCodecProvider = PojoCodecProvider.builder()
                 .automatic(true).build();
         CodecRegistry pojoCodecRegistry = fromRegistries(getDefaultCodecRegistry(),
-                fromCodecs(new ByteBufferCodec()),
-                fromProviders(pojoCodecProvider, new SongStructCodecProvider()));
+                fromProviders(pojoCodecProvider));
 
         MongoClient mongoClient = MongoSupport.getMongoClient();
         log.info("{}", mongoClient.getClusterDescription().toString());

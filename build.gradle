@@ -1,5 +1,6 @@
 plugins {
     id "java"
+    id "application"
 }
 
 group = "org.sample"
@@ -57,3 +58,31 @@ tasks.register("prepareThrift", Exec) {
 prepareThrift.dependsOn("generateThrift", "cleanThrift")
 
 compileJava.dependsOn("prepareThrift")
+
+tasks.register("jarServer", Jar) {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    from {
+        configurations.runtimeClasspath.collect {
+            f -> f.isDirectory() ? f : zipTree(f)
+        }
+    }
+    manifest {
+        attributes 'Main-Class': 'org.sample.app.ServerApp'
+    }
+    from sourceSets.main.output
+    archiveFileName = 'server.jar'
+}
+
+tasks.register("jarClient", Jar) {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    from {
+        configurations.runtimeClasspath.collect {
+            f -> f.isDirectory() ? f : zipTree(f)
+        }
+    }
+    manifest {
+        attributes 'Main-Class': 'org.sample.app.ClientApp'
+    }
+    from sourceSets.main.output
+    archiveFileName = 'client.jar'
+}

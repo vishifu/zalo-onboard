@@ -1,0 +1,6 @@
+FROM openjdk:8-jdk-alpine
+
+WORKDIR app/
+COPY ./build/libs/client.jar app.jar
+
+ENTRYPOINT ["java", "-jar", "app.jar"]
