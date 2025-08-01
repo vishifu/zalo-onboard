@@ -13,6 +13,7 @@ import org.bson.codecs.DecoderContext;
 import org.bson.codecs.EncoderContext;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.ParameterizedType;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -24,54 +25,14 @@ import java.util.Set;
 public class ThriftStructCodec<T extends TBase<T, ? extends TFieldIdEnum>> implements Codec<T> {
 
     private final Class<T> clazz;
-    private final Map<TFieldIdEnum, FieldMetaData> fieldMetaDataMap;
 
     public ThriftStructCodec(Class<T> clazz) {
         this.clazz = clazz;
-        try {
-            Field metaDataMapField = clazz.getField("metaDataMap");
-            this.fieldMetaDataMap = (Map<TFieldIdEnum, FieldMetaData>) metaDataMapField.get(null);
-        } catch (NoSuchFieldException | IllegalAccessException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     @Override
     public T decode(BsonReader bsonReader, DecoderContext decoderContext) {
-        try {
-            T instance = clazz.getDeclaredConstructor().newInstance();
-            bsonReader.readStartDocument();
-            while (bsonReader.readBsonType() != BsonType.END_OF_DOCUMENT) {
-
-                String fieldName = bsonReader.readName();
-
-                // skip _id
-                if ("_id".equals(fieldName)) {
-                    bsonReader.skipValue();
-                    continue;
-                }
-
-                // todo
-                TFieldIdEnum fieldIdEnum = fieldMetaDataMap.keySet()
-                        .stream()
-                        .filter(x -> x.getFieldName().equals(fieldName))
-                        .findFirst()
-                        .get();
-
-                FieldMetaData fieldMetaData = fieldMetaDataMap.get(fieldIdEnum);
-                if (fieldMetaData != null) {
-                    Object value = readValue(bsonReader, fieldMetaData.valueMetaData.type);
-                    setFieldValue(instance, fieldName, value);
-                } else {
-                    bsonReader.skipValue();
-                }
-            }
-
-            bsonReader.readEndDocument();
-            return instance;
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        return (T) readStruct(bsonReader,clazz);
     }
 
     @Override
@@ -84,7 +45,7 @@ public class ThriftStructCodec<T extends TBase<T, ? extends TFieldIdEnum>> imple
         return clazz;
     }
 
-    private Object readValue(BsonReader bsonReader, byte thriftType) {
+    private Object readValue(BsonReader bsonReader, byte thriftType, Class<?> clazz) {
         switch (thriftType) {
             case TType.BOOL:
                 return bsonReader.readBoolean();
@@ -109,59 +70,109 @@ public class ThriftStructCodec<T extends TBase<T, ? extends TFieldIdEnum>> imple
                     return bsonReader.readString();
                 }
             case TType.LIST:
-                return readList(bsonReader);
+                return readList(bsonReader, clazz);
             case TType.SET:
-                return readSet(bsonReader);
+                return readSet(bsonReader, clazz);
             case TType.MAP:
-                return readMap(bsonReader);
+                return readMap(bsonReader, clazz);
             case TType.STRUCT:
-                // implement recursive for nested struct
-                bsonReader.skipValue();
-                return null;
+                return readStruct(bsonReader, clazz);
             default:
                 bsonReader.skipValue();
                 return null;
         }
     }
 
-    private List<Object> readList(BsonReader bsonReader) {
+    private Object readStruct(BsonReader bsonReader, Class<?> clazz) {
+        try {
+            Object instance = clazz.getDeclaredConstructor().newInstance();
+            Field metaDataMapField = clazz.getField("metaDataMap");
+            Map<TFieldIdEnum, FieldMetaData> fieldMetaDataMap = (Map<TFieldIdEnum, FieldMetaData>) metaDataMapField.get(null);
+
+            bsonReader.readStartDocument();
+            while (bsonReader.readBsonType() != BsonType.END_OF_DOCUMENT) {
+                String fieldName = bsonReader.readName();
+
+                // skip _id
+                if ("_id".equals(fieldName)) {
+                    bsonReader.skipValue();
+                    continue;
+                }
+
+                // todo
+                TFieldIdEnum fieldIdEnum = fieldMetaDataMap.keySet()
+                        .stream()
+                        .filter(x -> x.getFieldName().equals(fieldName))
+                        .findFirst()
+                        .get();
+
+                FieldMetaData fieldMetaData = fieldMetaDataMap.get(fieldIdEnum);
+                if (fieldMetaData != null) {
+                    Field field = clazz.getDeclaredField(fieldName);
+                    field.setAccessible(true);
+
+                    Class<?> paramType = null;
+                    if (field.getGenericType() instanceof ParameterizedType) {
+                        paramType = (Class<?>) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
+                    }
+
+                    if (paramType == null) {
+                        paramType= field.getType();
+                    }
+
+                    Object value = readValue(bsonReader, fieldMetaData.valueMetaData.type, paramType);
+                    field.set(instance, convertValue(value, field.getType()));
+                } else {
+                    bsonReader.skipValue();
+                }
+            }
+
+            bsonReader.readEndDocument();
+            return instance;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+
+    private List<Object> readList(BsonReader bsonReader, Class<?> clazz) {
         List<Object> list = new ArrayList<>();
         bsonReader.readStartArray();
         while (bsonReader.readBsonType() != BsonType.END_OF_DOCUMENT) {
             BsonType bsonType = bsonReader.getCurrentBsonType();
-            list.add(readBsonValue(bsonReader, bsonType));
+            list.add(readBsonValue(bsonReader, bsonType, clazz));
         }
 
         bsonReader.readEndArray();
         return list;
     }
 
-    private Map<String, Object> readMap(BsonReader bsonReader) {
+    private Map<String, Object> readMap(BsonReader bsonReader, Class<?> clazz) {
         Map<String, Object> map = new HashMap<>();
         bsonReader.readStartDocument();
         while (bsonReader.readBsonType() != BsonType.END_OF_DOCUMENT) {
             String key = bsonReader.readName();
             BsonType bsonType = bsonReader.getCurrentBsonType();
-            map.put(key, readBsonValue(bsonReader, bsonType));
+            map.put(key, readBsonValue(bsonReader, bsonType, clazz));
         }
 
         bsonReader.readEndDocument();
         return map;
     }
 
-    private Set<Object> readSet(BsonReader bsonReader) {
+    private Set<Object> readSet(BsonReader bsonReader, Class<?> clazz) {
         Set<Object> set = new HashSet<>();
         bsonReader.readStartArray();
         while (bsonReader.readBsonType() != BsonType.END_OF_DOCUMENT) {
             BsonType bsonType = bsonReader.getCurrentBsonType();
-            set.add(readBsonValue(bsonReader, bsonType));
+            set.add(readBsonValue(bsonReader, bsonType, clazz));
         }
 
         bsonReader.readEndArray();
         return set;
     }
 
-    private Object readBsonValue(BsonReader bsonReader, BsonType bsonType) {
+    private Object readBsonValue(BsonReader bsonReader, BsonType bsonType, Class<?> clazz) {
         switch (bsonType) {
             case BOOLEAN:
                 return bsonReader.readBoolean();
@@ -176,6 +187,8 @@ public class ThriftStructCodec<T extends TBase<T, ? extends TFieldIdEnum>> imple
             case BINARY:
                 BsonBinary binary = bsonReader.readBinaryData();
                 return ByteBuffer.wrap(binary.getData());
+            case DOCUMENT:
+                return readStruct(bsonReader, clazz);
             case NULL:
                 bsonReader.readNull();
                 return null;
@@ -229,7 +242,6 @@ public class ThriftStructCodec<T extends TBase<T, ? extends TFieldIdEnum>> imple
                 break;
         }
     }
-
 
     private void writeStruct(BsonWriter bsonWriter, Object struct) {
         try {
@@ -309,14 +321,6 @@ public class ThriftStructCodec<T extends TBase<T, ? extends TFieldIdEnum>> imple
         Field field = instance.getClass().getField(fieldName);
         Object val = field.get(instance);
         return val;
-    }
-
-    private void setFieldValue(T instance, String fieldName, Object value) throws Exception {
-        Field field = clazz.getDeclaredField(fieldName);
-        field.setAccessible(true);
-        Class<?> paramType = field.getType();
-        Object converted = convertValue(value, paramType);
-        field.set(instance, converted);
     }
 
     private Object convertValue(Object value, Class<?> targetType) {

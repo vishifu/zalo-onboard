@@ -89,7 +89,7 @@ public class AppUserIOTaskImpl implements AppTask {
         clone1.id += 1000;
         clone1.name += "_clone1";
         SongStruct clone2 = song.deepCopy();
-        clone2.id += 1000;
+        clone2.id += 2000;
         clone2.name += "_clone2";
 
         song.innerSongs.add(clone1);
