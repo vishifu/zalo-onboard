@@ -2,7 +2,6 @@ package org.sample.mongo;
 
 import com.mongodb.client.MongoCollection;
 import org.bson.Document;
-import org.sample.app.server.service.MongoContext;
 
 public class MongoPersistence<T> {
 

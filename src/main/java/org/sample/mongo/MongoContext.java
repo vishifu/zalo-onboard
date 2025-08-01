@@ -1,4 +1,4 @@
-package org.sample.app.server.service;
+package org.sample.mongo;
 
 import com.mongodb.ConnectionString;
 import com.mongodb.MongoClientSettings;

@@ -2,7 +2,7 @@ package org.sample.app.server.handler;
 
 import org.apache.thrift.TException;
 import org.bson.Document;
-import org.sample.app.server.service.SongMongoPersistImpl;
+import org.sample.app.server.service.impl.SongMongoPersistImpl;
 import org.sample.thrift.SongService;
 import org.sample.thrift.SongStruct;
 import org.slf4j.Logger;

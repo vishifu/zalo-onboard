@@ -1,8 +1,7 @@
 package org.sample.app.client;
 
-import org.sample.app.client.service.AppTask;
+import org.sample.util.AppTask;
 import org.sample.app.client.service.SongLibService;
-import org.sample.app.client.service.impl.AppUserIOTaskImpl;
 import org.sample.app.client.service.impl.SongLibServiceImpl;
 
 
