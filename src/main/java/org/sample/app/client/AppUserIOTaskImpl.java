@@ -1,11 +1,14 @@
 package org.sample.app.client;
 
+import org.sample.thrift.DateStruct;
 import org.sample.util.AppTask;
 import org.sample.app.client.service.SongLibService;
 import org.sample.thrift.SongStruct;
 import org.sample.util.RandUtil;
 
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Scanner;
 import java.util.Set;
@@ -76,6 +79,22 @@ public class AppUserIOTaskImpl implements AppTask {
 
         ByteBuffer content = ByteBuffer.wrap(RandUtil.randBytes(1024));
 
-        return new SongStruct(id, name, rating, authorIDs, content);
+
+        DateStruct dateStruct = new DateStruct(1, 8, 2025);
+
+
+        SongStruct song = new SongStruct(id, name, rating, authorIDs, content, dateStruct, new ArrayList<>());
+
+        SongStruct clone1 = song.deepCopy();
+        clone1.id += 1000;
+        clone1.name += "_clone1";
+        SongStruct clone2 = song.deepCopy();
+        clone2.id += 1000;
+        clone2.name += "_clone2";
+
+        song.innerSongs.add(clone1);
+        song.innerSongs.add(clone2);
+
+        return song;
     }
 }

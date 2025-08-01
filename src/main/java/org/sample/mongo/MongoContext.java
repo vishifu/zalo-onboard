@@ -11,6 +11,7 @@ import org.bson.codecs.configuration.CodecProvider;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.codecs.pojo.PojoCodecProvider;
 import org.sample.mongo.codec.ThriftCodecProvider;
+import org.sample.thrift.DateStruct;
 import org.sample.thrift.SongStruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,7 +57,8 @@ public class MongoContext {
 
     private CodecRegistry initCodecRegistry() {
         ThriftCodecProvider thriftCodecProvider = new ThriftCodecProvider()
-                .register(SongStruct.class);
+                .register(SongStruct.class)
+                .register(DateStruct.class);
 
         CodecProvider pojoCodecProvider = PojoCodecProvider.builder()
                 .automatic(true).build();

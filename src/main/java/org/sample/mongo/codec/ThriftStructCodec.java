@@ -42,6 +42,7 @@ public class ThriftStructCodec<T extends TBase<T, ? extends TFieldIdEnum>> imple
             T instance = clazz.getDeclaredConstructor().newInstance();
             bsonReader.readStartDocument();
             while (bsonReader.readBsonType() != BsonType.END_OF_DOCUMENT) {
+
                 String fieldName = bsonReader.readName();
 
                 // skip _id
@@ -75,24 +76,7 @@ public class ThriftStructCodec<T extends TBase<T, ? extends TFieldIdEnum>> imple
 
     @Override
     public void encode(BsonWriter bsonWriter, T t, EncoderContext encoderContext) {
-        bsonWriter.writeStartDocument();
-
-        try {
-            for (Map.Entry<TFieldIdEnum, FieldMetaData> entry : fieldMetaDataMap.entrySet()) {
-                String fieldName = entry.getKey().getFieldName();
-                FieldMetaData fieldMetaData = entry.getValue();
-                Object fieldValue = getFieldValue(t, fieldName);
-
-                if (fieldValue != null) {
-                    bsonWriter.writeName(fieldName);
-                    writeValue(bsonWriter, fieldValue, fieldMetaData.valueMetaData.type);
-                }
-            }
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-
-        bsonWriter.writeEndDocument();
+        writeStruct(bsonWriter, t);
     }
 
     @Override
@@ -241,9 +225,31 @@ public class ThriftStructCodec<T extends TBase<T, ? extends TFieldIdEnum>> imple
                 break;
             case TType.STRUCT:
             default:
-                // recursive for nested struct
-                bsonWriter.writeNull();
+                writeStruct(bsonWriter, value);
                 break;
+        }
+    }
+
+
+    private void writeStruct(BsonWriter bsonWriter, Object struct) {
+        try {
+            Field metaDataMapField = struct.getClass().getField("metaDataMap");
+            Map<TFieldIdEnum, FieldMetaData> fieldMetaDataMap = (Map<TFieldIdEnum, FieldMetaData>) metaDataMapField.get(null);
+
+            bsonWriter.writeStartDocument();
+            for (Map.Entry<TFieldIdEnum, FieldMetaData> entry : fieldMetaDataMap.entrySet()) {
+                String fieldName = entry.getKey().getFieldName();
+                FieldMetaData fieldMetaData = entry.getValue();
+                Object fieldValue = getFieldValue(struct,fieldName);
+
+                if (fieldValue != null) {
+                    bsonWriter.writeName(fieldName);
+                    writeValue(bsonWriter, fieldValue, fieldMetaData.valueMetaData.type);
+                }
+            }
+            bsonWriter.writeEndDocument();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -276,7 +282,9 @@ public class ThriftStructCodec<T extends TBase<T, ? extends TFieldIdEnum>> imple
     }
 
     private void writeBsonValue(BsonWriter bsonWriter, Object value) {
-        if (value instanceof Boolean) {
+        if (value == null) {
+            bsonWriter.writeNull();
+        } else if (value instanceof Boolean) {
             bsonWriter.writeBoolean((Boolean) value);
         } else if (value instanceof Byte) {
             bsonWriter.writeInt32((Byte) value);
@@ -291,14 +299,14 @@ public class ThriftStructCodec<T extends TBase<T, ? extends TFieldIdEnum>> imple
         } else if (value instanceof String) {
             bsonWriter.writeString((String) value);
         } else {
-            bsonWriter.writeNull();
+            writeStruct(bsonWriter, value);
         }
     }
 
     /* USING REFLECTION TO SET FIELD */
 
-    private Object getFieldValue(T instance, String fieldName) throws Exception {
-        Field field = clazz.getField(fieldName);
+    private Object getFieldValue(Object instance, String fieldName) throws Exception {
+        Field field = instance.getClass().getField(fieldName);
         Object val = field.get(instance);
         return val;
     }

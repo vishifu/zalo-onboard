@@ -16,6 +16,8 @@ public class SongStruct implements org.apache.thrift.TBase<SongStruct, SongStruc
   private static final org.apache.thrift.protocol.TField RATING_FIELD_DESC = new org.apache.thrift.protocol.TField("rating", org.apache.thrift.protocol.TType.DOUBLE, (short)3);
   private static final org.apache.thrift.protocol.TField AUTHOR_ID_FIELD_DESC = new org.apache.thrift.protocol.TField("authorID", org.apache.thrift.protocol.TType.SET, (short)4);
   private static final org.apache.thrift.protocol.TField CONTENT_FIELD_DESC = new org.apache.thrift.protocol.TField("content", org.apache.thrift.protocol.TType.STRING, (short)5);
+  private static final org.apache.thrift.protocol.TField PUBLISH_DATE_FIELD_DESC = new org.apache.thrift.protocol.TField("publishDate", org.apache.thrift.protocol.TType.STRUCT, (short)6);
+  private static final org.apache.thrift.protocol.TField INNER_SONGS_FIELD_DESC = new org.apache.thrift.protocol.TField("innerSongs", org.apache.thrift.protocol.TType.LIST, (short)7);
 
   private static final org.apache.thrift.scheme.SchemeFactory STANDARD_SCHEME_FACTORY = new SongStructStandardSchemeFactory();
   private static final org.apache.thrift.scheme.SchemeFactory TUPLE_SCHEME_FACTORY = new SongStructTupleSchemeFactory();
@@ -25,6 +27,8 @@ public class SongStruct implements org.apache.thrift.TBase<SongStruct, SongStruc
   public double rating; // required
   public @org.apache.thrift.annotation.Nullable java.util.Set<java.lang.Integer> authorID; // required
   public @org.apache.thrift.annotation.Nullable java.nio.ByteBuffer content; // required
+  public @org.apache.thrift.annotation.Nullable DateStruct publishDate; // required
+  public @org.apache.thrift.annotation.Nullable java.util.List<SongStruct> innerSongs; // required
 
   /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
   public enum _Fields implements org.apache.thrift.TFieldIdEnum {
@@ -32,7 +36,9 @@ public class SongStruct implements org.apache.thrift.TBase<SongStruct, SongStruc
     NAME((short)2, "name"),
     RATING((short)3, "rating"),
     AUTHOR_ID((short)4, "authorID"),
-    CONTENT((short)5, "content");
+    CONTENT((short)5, "content"),
+    PUBLISH_DATE((short)6, "publishDate"),
+    INNER_SONGS((short)7, "innerSongs");
 
     private static final java.util.Map<java.lang.String, _Fields> byName = new java.util.HashMap<java.lang.String, _Fields>();
 
@@ -58,6 +64,10 @@ public class SongStruct implements org.apache.thrift.TBase<SongStruct, SongStruc
           return AUTHOR_ID;
         case 5: // CONTENT
           return CONTENT;
+        case 6: // PUBLISH_DATE
+          return PUBLISH_DATE;
+        case 7: // INNER_SONGS
+          return INNER_SONGS;
         default:
           return null;
       }
@@ -118,6 +128,11 @@ public class SongStruct implements org.apache.thrift.TBase<SongStruct, SongStruc
             new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.I32))));
     tmpMap.put(_Fields.CONTENT, new org.apache.thrift.meta_data.FieldMetaData("content", org.apache.thrift.TFieldRequirementType.DEFAULT, 
         new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING        , true)));
+    tmpMap.put(_Fields.PUBLISH_DATE, new org.apache.thrift.meta_data.FieldMetaData("publishDate", org.apache.thrift.TFieldRequirementType.DEFAULT, 
+        new org.apache.thrift.meta_data.StructMetaData(org.apache.thrift.protocol.TType.STRUCT, DateStruct.class)));
+    tmpMap.put(_Fields.INNER_SONGS, new org.apache.thrift.meta_data.FieldMetaData("innerSongs", org.apache.thrift.TFieldRequirementType.DEFAULT, 
+        new org.apache.thrift.meta_data.ListMetaData(org.apache.thrift.protocol.TType.LIST, 
+            new org.apache.thrift.meta_data.StructMetaData(org.apache.thrift.protocol.TType.STRUCT, SongStruct.class))));
     metaDataMap = java.util.Collections.unmodifiableMap(tmpMap);
     org.apache.thrift.meta_data.FieldMetaData.addStructMetaDataMap(SongStruct.class, metaDataMap);
   }
@@ -130,7 +145,9 @@ public class SongStruct implements org.apache.thrift.TBase<SongStruct, SongStruc
     java.lang.String name,
     double rating,
     java.util.Set<java.lang.Integer> authorID,
-    java.nio.ByteBuffer content)
+    java.nio.ByteBuffer content,
+    DateStruct publishDate,
+    java.util.List<SongStruct> innerSongs)
   {
     this();
     this.id = id;
@@ -140,6 +157,8 @@ public class SongStruct implements org.apache.thrift.TBase<SongStruct, SongStruc
     setRatingIsSet(true);
     this.authorID = authorID;
     this.content = org.apache.thrift.TBaseHelper.copyBinary(content);
+    this.publishDate = publishDate;
+    this.innerSongs = innerSongs;
   }
 
   /**
@@ -159,6 +178,16 @@ public class SongStruct implements org.apache.thrift.TBase<SongStruct, SongStruc
     if (other.isSetContent()) {
       this.content = org.apache.thrift.TBaseHelper.copyBinary(other.content);
     }
+    if (other.isSetPublishDate()) {
+      this.publishDate = new DateStruct(other.publishDate);
+    }
+    if (other.isSetInnerSongs()) {
+      java.util.List<SongStruct> __this__innerSongs = new java.util.ArrayList<SongStruct>(other.innerSongs.size());
+      for (SongStruct other_element : other.innerSongs) {
+        __this__innerSongs.add(new SongStruct(other_element));
+      }
+      this.innerSongs = __this__innerSongs;
+    }
   }
 
   @Override
@@ -175,6 +204,8 @@ public class SongStruct implements org.apache.thrift.TBase<SongStruct, SongStruc
     this.rating = 0.0;
     this.authorID = null;
     this.content = null;
+    this.publishDate = null;
+    this.innerSongs = null;
   }
 
   public int getId() {
@@ -323,6 +354,72 @@ public class SongStruct implements org.apache.thrift.TBase<SongStruct, SongStruc
     }
   }
 
+  @org.apache.thrift.annotation.Nullable
+  public DateStruct getPublishDate() {
+    return this.publishDate;
+  }
+
+  public SongStruct setPublishDate(@org.apache.thrift.annotation.Nullable DateStruct publishDate) {
+    this.publishDate = publishDate;
+    return this;
+  }
+
+  public void unsetPublishDate() {
+    this.publishDate = null;
+  }
+
+  /** Returns true if field publishDate is set (has been assigned a value) and false otherwise */
+  public boolean isSetPublishDate() {
+    return this.publishDate != null;
+  }
+
+  public void setPublishDateIsSet(boolean value) {
+    if (!value) {
+      this.publishDate = null;
+    }
+  }
+
+  public int getInnerSongsSize() {
+    return (this.innerSongs == null) ? 0 : this.innerSongs.size();
+  }
+
+  @org.apache.thrift.annotation.Nullable
+  public java.util.Iterator<SongStruct> getInnerSongsIterator() {
+    return (this.innerSongs == null) ? null : this.innerSongs.iterator();
+  }
+
+  public void addToInnerSongs(SongStruct elem) {
+    if (this.innerSongs == null) {
+      this.innerSongs = new java.util.ArrayList<SongStruct>();
+    }
+    this.innerSongs.add(elem);
+  }
+
+  @org.apache.thrift.annotation.Nullable
+  public java.util.List<SongStruct> getInnerSongs() {
+    return this.innerSongs;
+  }
+
+  public SongStruct setInnerSongs(@org.apache.thrift.annotation.Nullable java.util.List<SongStruct> innerSongs) {
+    this.innerSongs = innerSongs;
+    return this;
+  }
+
+  public void unsetInnerSongs() {
+    this.innerSongs = null;
+  }
+
+  /** Returns true if field innerSongs is set (has been assigned a value) and false otherwise */
+  public boolean isSetInnerSongs() {
+    return this.innerSongs != null;
+  }
+
+  public void setInnerSongsIsSet(boolean value) {
+    if (!value) {
+      this.innerSongs = null;
+    }
+  }
+
   @Override
   public void setFieldValue(_Fields field, @org.apache.thrift.annotation.Nullable java.lang.Object value) {
     switch (field) {
@@ -370,6 +467,22 @@ public class SongStruct implements org.apache.thrift.TBase<SongStruct, SongStruc
       }
       break;
 
+    case PUBLISH_DATE:
+      if (value == null) {
+        unsetPublishDate();
+      } else {
+        setPublishDate((DateStruct)value);
+      }
+      break;
+
+    case INNER_SONGS:
+      if (value == null) {
+        unsetInnerSongs();
+      } else {
+        setInnerSongs((java.util.List<SongStruct>)value);
+      }
+      break;
+
     }
   }
 
@@ -391,6 +504,12 @@ public class SongStruct implements org.apache.thrift.TBase<SongStruct, SongStruc
 
     case CONTENT:
       return getContent();
+
+    case PUBLISH_DATE:
+      return getPublishDate();
+
+    case INNER_SONGS:
+      return getInnerSongs();
 
     }
     throw new java.lang.IllegalStateException();
@@ -414,6 +533,10 @@ public class SongStruct implements org.apache.thrift.TBase<SongStruct, SongStruc
       return isSetAuthorID();
     case CONTENT:
       return isSetContent();
+    case PUBLISH_DATE:
+      return isSetPublishDate();
+    case INNER_SONGS:
+      return isSetInnerSongs();
     }
     throw new java.lang.IllegalStateException();
   }
@@ -476,6 +599,24 @@ public class SongStruct implements org.apache.thrift.TBase<SongStruct, SongStruc
         return false;
     }
 
+    boolean this_present_publishDate = true && this.isSetPublishDate();
+    boolean that_present_publishDate = true && that.isSetPublishDate();
+    if (this_present_publishDate || that_present_publishDate) {
+      if (!(this_present_publishDate && that_present_publishDate))
+        return false;
+      if (!this.publishDate.equals(that.publishDate))
+        return false;
+    }
+
+    boolean this_present_innerSongs = true && this.isSetInnerSongs();
+    boolean that_present_innerSongs = true && that.isSetInnerSongs();
+    if (this_present_innerSongs || that_present_innerSongs) {
+      if (!(this_present_innerSongs && that_present_innerSongs))
+        return false;
+      if (!this.innerSongs.equals(that.innerSongs))
+        return false;
+    }
+
     return true;
   }
 
@@ -498,6 +639,14 @@ public class SongStruct implements org.apache.thrift.TBase<SongStruct, SongStruc
     hashCode = hashCode * 8191 + ((isSetContent()) ? 131071 : 524287);
     if (isSetContent())
       hashCode = hashCode * 8191 + content.hashCode();
+
+    hashCode = hashCode * 8191 + ((isSetPublishDate()) ? 131071 : 524287);
+    if (isSetPublishDate())
+      hashCode = hashCode * 8191 + publishDate.hashCode();
+
+    hashCode = hashCode * 8191 + ((isSetInnerSongs()) ? 131071 : 524287);
+    if (isSetInnerSongs())
+      hashCode = hashCode * 8191 + innerSongs.hashCode();
 
     return hashCode;
   }
@@ -560,6 +709,26 @@ public class SongStruct implements org.apache.thrift.TBase<SongStruct, SongStruc
         return lastComparison;
       }
     }
+    lastComparison = java.lang.Boolean.compare(isSetPublishDate(), other.isSetPublishDate());
+    if (lastComparison != 0) {
+      return lastComparison;
+    }
+    if (isSetPublishDate()) {
+      lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.publishDate, other.publishDate);
+      if (lastComparison != 0) {
+        return lastComparison;
+      }
+    }
+    lastComparison = java.lang.Boolean.compare(isSetInnerSongs(), other.isSetInnerSongs());
+    if (lastComparison != 0) {
+      return lastComparison;
+    }
+    if (isSetInnerSongs()) {
+      lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.innerSongs, other.innerSongs);
+      if (lastComparison != 0) {
+        return lastComparison;
+      }
+    }
     return 0;
   }
 
@@ -615,6 +784,22 @@ public class SongStruct implements org.apache.thrift.TBase<SongStruct, SongStruc
       org.apache.thrift.TBaseHelper.toString(this.content, sb);
     }
     first = false;
+    if (!first) sb.append(", ");
+    sb.append("publishDate:");
+    if (this.publishDate == null) {
+      sb.append("null");
+    } else {
+      sb.append(this.publishDate);
+    }
+    first = false;
+    if (!first) sb.append(", ");
+    sb.append("innerSongs:");
+    if (this.innerSongs == null) {
+      sb.append("null");
+    } else {
+      sb.append(this.innerSongs);
+    }
+    first = false;
     sb.append(")");
     return sb.toString();
   }
@@ -622,6 +807,9 @@ public class SongStruct implements org.apache.thrift.TBase<SongStruct, SongStruc
   public void validate() throws org.apache.thrift.TException {
     // check for required fields
     // check for sub-struct validity
+    if (publishDate != null) {
+      publishDate.validate();
+    }
   }
 
   private void writeObject(java.io.ObjectOutputStream out) throws java.io.IOException {
@@ -712,6 +900,34 @@ public class SongStruct implements org.apache.thrift.TBase<SongStruct, SongStruc
               org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
             }
             break;
+          case 6: // PUBLISH_DATE
+            if (schemeField.type == org.apache.thrift.protocol.TType.STRUCT) {
+              struct.publishDate = new DateStruct();
+              struct.publishDate.read(iprot);
+              struct.setPublishDateIsSet(true);
+            } else { 
+              org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+            }
+            break;
+          case 7: // INNER_SONGS
+            if (schemeField.type == org.apache.thrift.protocol.TType.LIST) {
+              {
+                org.apache.thrift.protocol.TList _list3 = iprot.readListBegin();
+                struct.innerSongs = new java.util.ArrayList<SongStruct>(_list3.size);
+                @org.apache.thrift.annotation.Nullable SongStruct _elem4;
+                for (int _i5 = 0; _i5 < _list3.size; ++_i5)
+                {
+                  _elem4 = new SongStruct();
+                  _elem4.read(iprot);
+                  struct.innerSongs.add(_elem4);
+                }
+                iprot.readListEnd();
+              }
+              struct.setInnerSongsIsSet(true);
+            } else { 
+              org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+            }
+            break;
           default:
             org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
         }
@@ -743,9 +959,9 @@ public class SongStruct implements org.apache.thrift.TBase<SongStruct, SongStruc
         oprot.writeFieldBegin(AUTHOR_ID_FIELD_DESC);
         {
           oprot.writeSetBegin(new org.apache.thrift.protocol.TSet(org.apache.thrift.protocol.TType.I32, struct.authorID.size()));
-          for (int _iter3 : struct.authorID)
+          for (int _iter6 : struct.authorID)
           {
-            oprot.writeI32(_iter3);
+            oprot.writeI32(_iter6);
           }
           oprot.writeSetEnd();
         }
@@ -754,6 +970,23 @@ public class SongStruct implements org.apache.thrift.TBase<SongStruct, SongStruc
       if (struct.content != null) {
         oprot.writeFieldBegin(CONTENT_FIELD_DESC);
         oprot.writeBinary(struct.content);
+        oprot.writeFieldEnd();
+      }
+      if (struct.publishDate != null) {
+        oprot.writeFieldBegin(PUBLISH_DATE_FIELD_DESC);
+        struct.publishDate.write(oprot);
+        oprot.writeFieldEnd();
+      }
+      if (struct.innerSongs != null) {
+        oprot.writeFieldBegin(INNER_SONGS_FIELD_DESC);
+        {
+          oprot.writeListBegin(new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRUCT, struct.innerSongs.size()));
+          for (SongStruct _iter7 : struct.innerSongs)
+          {
+            _iter7.write(oprot);
+          }
+          oprot.writeListEnd();
+        }
         oprot.writeFieldEnd();
       }
       oprot.writeFieldStop();
@@ -790,7 +1023,13 @@ public class SongStruct implements org.apache.thrift.TBase<SongStruct, SongStruc
       if (struct.isSetContent()) {
         optionals.set(4);
       }
-      oprot.writeBitSet(optionals, 5);
+      if (struct.isSetPublishDate()) {
+        optionals.set(5);
+      }
+      if (struct.isSetInnerSongs()) {
+        optionals.set(6);
+      }
+      oprot.writeBitSet(optionals, 7);
       if (struct.isSetId()) {
         oprot.writeI32(struct.id);
       }
@@ -803,21 +1042,33 @@ public class SongStruct implements org.apache.thrift.TBase<SongStruct, SongStruc
       if (struct.isSetAuthorID()) {
         {
           oprot.writeI32(struct.authorID.size());
-          for (int _iter4 : struct.authorID)
+          for (int _iter8 : struct.authorID)
           {
-            oprot.writeI32(_iter4);
+            oprot.writeI32(_iter8);
           }
         }
       }
       if (struct.isSetContent()) {
         oprot.writeBinary(struct.content);
       }
+      if (struct.isSetPublishDate()) {
+        struct.publishDate.write(oprot);
+      }
+      if (struct.isSetInnerSongs()) {
+        {
+          oprot.writeI32(struct.innerSongs.size());
+          for (SongStruct _iter9 : struct.innerSongs)
+          {
+            _iter9.write(oprot);
+          }
+        }
+      }
     }
 
     @Override
     public void read(org.apache.thrift.protocol.TProtocol prot, SongStruct struct) throws org.apache.thrift.TException {
       org.apache.thrift.protocol.TTupleProtocol iprot = (org.apache.thrift.protocol.TTupleProtocol) prot;
-      java.util.BitSet incoming = iprot.readBitSet(5);
+      java.util.BitSet incoming = iprot.readBitSet(7);
       if (incoming.get(0)) {
         struct.id = iprot.readI32();
         struct.setIdIsSet(true);
@@ -832,13 +1083,13 @@ public class SongStruct implements org.apache.thrift.TBase<SongStruct, SongStruc
       }
       if (incoming.get(3)) {
         {
-          org.apache.thrift.protocol.TSet _set5 = iprot.readSetBegin(org.apache.thrift.protocol.TType.I32);
-          struct.authorID = new java.util.HashSet<java.lang.Integer>(2*_set5.size);
-          int _elem6;
-          for (int _i7 = 0; _i7 < _set5.size; ++_i7)
+          org.apache.thrift.protocol.TSet _set10 = iprot.readSetBegin(org.apache.thrift.protocol.TType.I32);
+          struct.authorID = new java.util.HashSet<java.lang.Integer>(2*_set10.size);
+          int _elem11;
+          for (int _i12 = 0; _i12 < _set10.size; ++_i12)
           {
-            _elem6 = iprot.readI32();
-            struct.authorID.add(_elem6);
+            _elem11 = iprot.readI32();
+            struct.authorID.add(_elem11);
           }
         }
         struct.setAuthorIDIsSet(true);
@@ -846,6 +1097,25 @@ public class SongStruct implements org.apache.thrift.TBase<SongStruct, SongStruc
       if (incoming.get(4)) {
         struct.content = iprot.readBinary();
         struct.setContentIsSet(true);
+      }
+      if (incoming.get(5)) {
+        struct.publishDate = new DateStruct();
+        struct.publishDate.read(iprot);
+        struct.setPublishDateIsSet(true);
+      }
+      if (incoming.get(6)) {
+        {
+          org.apache.thrift.protocol.TList _list13 = iprot.readListBegin(org.apache.thrift.protocol.TType.STRUCT);
+          struct.innerSongs = new java.util.ArrayList<SongStruct>(_list13.size);
+          @org.apache.thrift.annotation.Nullable SongStruct _elem14;
+          for (int _i15 = 0; _i15 < _list13.size; ++_i15)
+          {
+            _elem14 = new SongStruct();
+            _elem14.read(iprot);
+            struct.innerSongs.add(_elem14);
+          }
+        }
+        struct.setInnerSongsIsSet(true);
       }
     }
   }
