@@ -7,7 +7,9 @@ import org.apache.thrift.transport.TServerSocket;
 import org.apache.thrift.transport.TServerTransport;
 import org.apache.thrift.transport.TTransportException;
 import org.sample.app.server.handler.SongServiceHandler;
+import org.sample.app.server.service.MongoContext;
 import org.sample.app.server.service.SongMongoPersistImpl;
+import org.sample.mongo.MongoConstants;
 import org.sample.thrift.SongService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,9 +23,13 @@ public class ServerApplication {
     private static final Logger log = LoggerFactory.getLogger(ServerApplication.class);
 
     public static void main(String[] args) throws TTransportException {
+        String conn = System.getenv("MONGODB_CONNECTION_STRING");
+        log.info("detect MONGO connection string: {}", conn);
+        MongoContext context = new MongoContext();
+        context.connect(conn, MongoConstants.DATABASE_NAME);
 
         SongService.Processor<SongServiceHandler> processor = new SongService.Processor<>(
-                new SongServiceHandler(new SongMongoPersistImpl()));
+                new SongServiceHandler(new SongMongoPersistImpl(context)));
 
         TServerTransport transport = new TServerSocket(port);
         TServer.Args serverArgs = new TServer.Args(transport)

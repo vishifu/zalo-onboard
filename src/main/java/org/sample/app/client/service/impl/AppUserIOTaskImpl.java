@@ -28,7 +28,7 @@ public class AppUserIOTaskImpl implements AppTask {
         println("Input:");
         println("\t1: get a song");
         println("\t2: save a song");
-
+        println("\tany: to exit");
 
         while (true) {
             print("input op: ");
@@ -37,7 +37,6 @@ public class AppUserIOTaskImpl implements AppTask {
                 case 1:
                     int id = inputSongID();
                     SongStruct song = libService.find(id);
-                    println("got song: " + song);
                     break;
 
                 case 2:

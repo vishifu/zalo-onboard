@@ -1,4 +1,4 @@
-package org.sample.mongo;
+package org.sample.mongo.codec;
 
 import org.apache.thrift.TBase;
 import org.apache.thrift.TFieldIdEnum;
@@ -50,6 +50,7 @@ public class ThriftStructCodec<T extends TBase<T, ? extends TFieldIdEnum>> imple
                     continue;
                 }
 
+                // todo
                 TFieldIdEnum fieldIdEnum = fieldMetaDataMap.keySet()
                         .stream()
                         .filter(x -> x.getFieldName().equals(fieldName))
@@ -100,37 +101,43 @@ public class ThriftStructCodec<T extends TBase<T, ? extends TFieldIdEnum>> imple
     }
 
     private Object readValue(BsonReader bsonReader, byte thriftType) {
-        return switch (thriftType) {
-            case TType.BOOL -> bsonReader.readBoolean();
-            case TType.BYTE -> (byte) bsonReader.readInt32();
-            case TType.I16 -> (short) bsonReader.readInt32();
-            case TType.I32 -> bsonReader.readInt32();
-            case TType.I64 -> bsonReader.readInt64();
-            case TType.DOUBLE -> bsonReader.readDouble();
-            case TType.STRING -> {
+        switch (thriftType) {
+            case TType.BOOL:
+                return bsonReader.readBoolean();
+            case TType.BYTE:
+                return (byte) bsonReader.readInt32();
+            case TType.I16:
+                return (short) bsonReader.readInt32();
+            case TType.I32:
+                return bsonReader.readInt32();
+            case TType.I64:
+                return bsonReader.readInt64();
+            case TType.DOUBLE:
+                return bsonReader.readDouble();
+            case TType.STRING:
                 BsonType currentType = bsonReader.getCurrentBsonType();
                 if (currentType == BsonType.BINARY) {
                     // This is a ByteBuffer field stored as binary
                     BsonBinary binary = bsonReader.readBinaryData();
-                    yield  ByteBuffer.wrap(binary.getData());
+                    return ByteBuffer.wrap(binary.getData());
                 } else {
                     // This is a regular string
-                    yield  bsonReader.readString();
+                    return bsonReader.readString();
                 }
-            }
-            case TType.LIST -> readList(bsonReader);
-            case TType.SET -> readSet(bsonReader);
-            case TType.MAP -> readMap(bsonReader);
-            case TType.STRUCT -> {
+            case TType.LIST:
+                return readList(bsonReader);
+            case TType.SET:
+                return readSet(bsonReader);
+            case TType.MAP:
+                return readMap(bsonReader);
+            case TType.STRUCT:
                 // implement recursive for nested struct
                 bsonReader.skipValue();
-                yield null;
-            }
-            default -> {
+                return null;
+            default:
                 bsonReader.skipValue();
-                yield null;
-            }
-        };
+                return null;
+        }
     }
 
     private List<Object> readList(BsonReader bsonReader) {
@@ -171,25 +178,27 @@ public class ThriftStructCodec<T extends TBase<T, ? extends TFieldIdEnum>> imple
     }
 
     private Object readBsonValue(BsonReader bsonReader, BsonType bsonType) {
-        return switch (bsonType) {
-            case BOOLEAN -> bsonReader.readBoolean();
-            case INT32 -> bsonReader.readInt32();
-            case INT64 -> bsonReader.readInt64();
-            case DOUBLE -> bsonReader.readDouble();
-            case STRING -> bsonReader.readString();
-            case BINARY -> {
+        switch (bsonType) {
+            case BOOLEAN:
+                return bsonReader.readBoolean();
+            case INT32:
+                return bsonReader.readInt32();
+            case INT64:
+                return bsonReader.readInt64();
+            case DOUBLE:
+                return bsonReader.readDouble();
+            case STRING:
+                return bsonReader.readString();
+            case BINARY:
                 BsonBinary binary = bsonReader.readBinaryData();
-                yield  ByteBuffer.wrap(binary.getData());
-            }
-            case NULL -> {
+                return ByteBuffer.wrap(binary.getData());
+            case NULL:
                 bsonReader.readNull();
-                yield null;
-            }
-            default -> {
+                return null;
+            default:
                 bsonReader.skipValue();
-                yield null;
-            }
-        };
+                return null;
+        }
     }
 
     private void writeValue(BsonWriter bsonWriter, Object value, byte type) {
@@ -214,7 +223,8 @@ public class ThriftStructCodec<T extends TBase<T, ? extends TFieldIdEnum>> imple
                 bsonWriter.writeDouble((Double) value);
                 break;
             case TType.STRING:
-                if (value instanceof ByteBuffer buf) {
+                if (value instanceof ByteBuffer) {
+                    ByteBuffer buf = (ByteBuffer) value;
                     bsonWriter.writeBinaryData(new BsonBinary(buf.array()));
                 } else {
                     bsonWriter.writeString((String) value);
@@ -266,18 +276,26 @@ public class ThriftStructCodec<T extends TBase<T, ? extends TFieldIdEnum>> imple
     }
 
     private void writeBsonValue(BsonWriter bsonWriter, Object value) {
-        switch (value) {
-            case null -> bsonWriter.writeNull();
-            case Boolean b -> bsonWriter.writeBoolean(b);
-            case Byte b -> bsonWriter.writeInt32(b);
-            case Short i -> bsonWriter.writeInt32(i);
-            case Long l -> bsonWriter.writeInt64(l);
-            case Double v -> bsonWriter.writeDouble(v);
-            case String s -> bsonWriter.writeString(s);
-            default -> bsonWriter.writeString(value.toString());
+        if (value instanceof Boolean) {
+            bsonWriter.writeBoolean((Boolean) value);
+        } else if (value instanceof Byte) {
+            bsonWriter.writeInt32((Byte) value);
+        } else if (value instanceof Short) {
+            bsonWriter.writeInt32((Short) value);
+        } else if (value instanceof Integer) {
+            bsonWriter.writeInt32((Integer) value);
+        } else if (value instanceof Long) {
+            bsonWriter.writeInt64((Long) value);
+        } else if (value instanceof Double) {
+            bsonWriter.writeDouble((Double) value);
+        } else if (value instanceof String) {
+            bsonWriter.writeString((String) value);
+        } else {
+            bsonWriter.writeNull();
         }
     }
 
+    /* USING REFLECTION TO SET FIELD */
 
     private Object getFieldValue(T instance, String fieldName) throws Exception {
         Field field = clazz.getField(fieldName);

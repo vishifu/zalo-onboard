@@ -19,7 +19,14 @@ public class SongServiceHandler implements SongService.Iface {
 
     @Override
     public SongStruct get(int id) throws TException {
-        return persistence.find(new Document("id", id));
+        SongStruct gotOne = persistence.findOne(new Document("id", id));
+        log.info("found: {}", gotOne);
+
+        if (gotOne == null) {
+            return new SongStruct();
+        }
+
+        return gotOne;
     }
 
     @Override

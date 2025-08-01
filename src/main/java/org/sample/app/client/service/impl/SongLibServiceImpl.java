@@ -39,7 +39,7 @@ public class SongLibServiceImpl implements SongLibService {
     }
 
     public SongStruct find(int id) {
-        SongStruct song = null;
+        SongStruct song;
         try {
             song = client.get(id);
         } catch (TException e) {

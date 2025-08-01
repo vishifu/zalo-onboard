@@ -1,4 +1,4 @@
-package org.sample.mongo;
+package org.sample.mongo.codec;
 
 import org.apache.thrift.TBase;
 import org.apache.thrift.TFieldIdEnum;
