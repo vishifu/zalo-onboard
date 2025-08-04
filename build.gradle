@@ -1,5 +1,6 @@
 plugins {
     id "java"
+    id "application"
 }
 
 group = "org.sample"
@@ -10,6 +11,8 @@ repositories {
 }
 
 dependencies {
+    // https://mvnrepository.com/artifact/org.mongodb/mongodb-driver-sync
+    implementation("org.mongodb:mongodb-driver-sync:5.5.1")
     // https://mvnrepository.com/artifact/org.apache.thrift/libthrift
     implementation("org.apache.thrift:libthrift:0.22.0")
     // https://mvnrepository.com/artifact/org.slf4j/slf4j-api
@@ -55,3 +58,31 @@ tasks.register("prepareThrift", Exec) {
 prepareThrift.dependsOn("generateThrift", "cleanThrift")
 
 compileJava.dependsOn("prepareThrift")
+
+tasks.register("jarServer", Jar) {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    from {
+        configurations.runtimeClasspath.collect {
+            f -> f.isDirectory() ? f : zipTree(f)
+        }
+    }
+    manifest {
+        attributes 'Main-Class': 'org.sample.app.ServerApp'
+    }
+    from sourceSets.main.output
+    archiveFileName = 'server.jar'
+}
+
+tasks.register("jarClient", Jar) {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    from {
+        configurations.runtimeClasspath.collect {
+            f -> f.isDirectory() ? f : zipTree(f)
+        }
+    }
+    manifest {
+        attributes 'Main-Class': 'org.sample.app.ClientApp'
+    }
+    from sourceSets.main.output
+    archiveFileName = 'client.jar'
+}

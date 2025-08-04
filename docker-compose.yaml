@@ -1,0 +1,21 @@
+services:
+  mongo:
+    image: mongo
+    ports:
+      - "27017:27017"
+    networks:
+      - server
+
+  server:
+    build:
+      context: .
+      dockerfile: Dockerfile.server
+    environment:
+      - MONGODB_CONNECTION_STRING=mongodb://mongo:27017/
+    ports:
+      - "9900:9900"
+    networks:
+      - server
+
+networks:
+  server:
